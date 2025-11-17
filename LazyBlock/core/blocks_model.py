@@ -38,3 +38,7 @@ class Block:
         values = set(_INPUT_PATTERN.findall(self.input_template))
         values.update(_INPUT_PATTERN.findall(self.output_template))
         return sorted(int(v) for v in values)
+    
+from core.blocks_model import Block
+
+__all__ = ["Block"]
