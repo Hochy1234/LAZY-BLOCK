@@ -23,6 +23,13 @@ class EditorPanel(ttk.Frame):
 
         scrollbar = ttk.Scrollbar(container, orient="vertical")
         text = tk.Text(container, wrap="word", undo=True, yscrollcommand=scrollbar.set)
+        text.tag_configure(
+            "block_token",
+            background="#e3e7f3",
+            foreground="#2c3e50",
+            relief="ridge",
+            borderwidth=1,
+        )
         scrollbar.configure(command=text.yview)
         text.grid(row=0, column=0, sticky="nsew")
         scrollbar.grid(row=0, column=1, sticky="ns")
@@ -44,3 +51,7 @@ class EditorPanel(ttk.Frame):
 
     def insert_text_at_cursor(self, text: str) -> None:
         self._text().insert(tk.INSERT, text)
+
+    def insert_block_token(self, block_name: str) -> None:
+        token = f"[BLOCK:{block_name}]"
+        self._text().insert(tk.INSERT, token, "block_token")
