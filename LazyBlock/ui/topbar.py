@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Callable, Iterable, Sequence
 
-import ttkbootstrap as ttk
+from lazy_block.ttk_compat import ttk
 
 
 class TopBar(ttk.Frame):

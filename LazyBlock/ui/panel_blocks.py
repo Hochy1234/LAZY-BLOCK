@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import filedialog
 from typing import Callable, Iterable
 
-from ttkbootstrap import ttk
+from lazy_block.ttk_compat import ttk
 
 from core.blocks_model import Block
 

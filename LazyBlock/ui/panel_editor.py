@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import tkinter as tk
 
-from ttkbootstrap import ttk
+from lazy_block.ttk_compat import ttk
 
 
 class EditorPanel(ttk.Frame):

@@ -1,7 +1,7 @@
 """Main entry point for Lazy Block UI demo."""
 from __future__ import annotations
 
-import ttkbootstrap as ttk
+from lazy_block.ttk_compat import ttk
 
 from core.blocks_model import Block
 from core.transform_engine import render_block_for_input, render_block_for_output
