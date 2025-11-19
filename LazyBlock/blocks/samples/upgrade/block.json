@@ -1,0 +1,7 @@
+{
+  "name": "upgrade",
+  "display_text": "升級",
+  "input_template": "1!2!3! ABCD 哈哈哈 [升級] 一筆一筆\n第二段",
+  "output_template": "1!2!3! ABCD 哈哈哈 Upgrade! 一筆一筆\n第二段",
+  "inputs": []
+}

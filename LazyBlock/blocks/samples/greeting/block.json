@@ -1,0 +1,7 @@
+{
+  "name": "greeting",
+  "display_text": "問候",
+  "input_template": "Hello {輸入文字(1)}!",
+  "output_template": "Upgrade greeting: {輸入文字(1)} -> {輸入文字(2)}",
+  "inputs": [1, 2]
+}

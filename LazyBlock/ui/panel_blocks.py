@@ -61,7 +61,12 @@ class BlocksPanel(ttk.Frame):
     def _handle_browse(self) -> None:
         directory = filedialog.askdirectory()
         if directory:
-            self._folder_var.set(directory)
+            self.set_folder_path(directory, notify=True)
+
+    def set_folder_path(self, directory: str, *, notify: bool = False) -> None:
+        """Update the folder entry and optionally tell listeners."""
+        self._folder_var.set(directory)
+        if notify and callable(self._on_folder_changed):
             self._on_folder_changed(directory)
 
     def set_blocks(self, blocks: Iterable[Block]) -> None:
