@@ -30,10 +30,9 @@ class OutputPanel(ttk.Frame):
             wrap="word",
             state="disabled",
             yscrollcommand=scrollbar.set,
-            disabledbackground="#f5f5f5",
-            disabledforeground="#1a1a1a",
             relief="flat",
         )
+        text.configure(background="#f5f5f5", foreground="#1a1a1a")
         scrollbar.configure(command=text.yview)
         text.grid(row=0, column=0, sticky="nsew")
         scrollbar.grid(row=0, column=1, sticky="ns")
