@@ -7,8 +7,14 @@ from tkinter import messagebox, simpledialog
 from lazy_block.ttk_compat import ttk
 
 from core.blocks_model import Block
-from core.blocks_storage import list_blocks_in_folder, save_block
+from core.blocks_storage import (
+    delete_block,
+    list_block_folder_entries,
+    rename_block_folder,
+    save_block,
+)
 from core.transform_engine import render_block_for_input, render_block_for_output
+from ui.dialog_create_block import show_create_block_dialog
 from ui.panel_blocks import BlocksPanel
 from ui.panel_editor import EditorPanel
 from ui.panel_output import OutputPanel
@@ -48,11 +54,31 @@ def main() -> None:
         if not block_file.exists():
             save_block(block, block_folder)
 
+    current_folder_path = str(default_folder)
+    block_locations: dict[str, Path] = {}
+
     def handle_category_changed(name: str) -> None:
         print(f"Category changed: {name}")
 
     def handle_create_block() -> None:
-        print("Create block clicked")
+        if not current_folder_path:
+            messagebox.showerror("創建方塊失敗", "請先選擇資料夾。", parent=root)
+            return
+
+        def _on_submit(block: Block) -> None:
+            folder = Path(current_folder_path)
+            block_folder = folder / block.name
+            if block_folder.exists():
+                messagebox.showerror(
+                    "創建方塊失敗",
+                    f"資料夾已存在：{block_folder}",
+                    parent=root,
+                )
+                return
+            save_block(block, block_folder)
+            load_blocks_from_folder(current_folder_path)
+
+        show_create_block_dialog(root, on_submit=_on_submit)
 
     def handle_theme_changed(theme: str) -> None:
         if hasattr(style, "theme_use"):
@@ -117,21 +143,66 @@ def main() -> None:
     def load_blocks_from_folder(path: str) -> None:
         folder = Path(path)
         try:
-            blocks = list_blocks_in_folder(folder)
+            entries = list_block_folder_entries(folder)
         except Exception as exc:
             messagebox.showerror("讀取方塊失敗", str(exc), parent=root)
             return
+        block_locations.clear()
+        blocks: list[Block] = []
+        for block, block_path in entries:
+            block_locations[block.name] = block_path
+            blocks.append(block)
         if blocks_panel is not None:
             blocks_panel.set_blocks(blocks)
         print(f"Loaded {len(blocks)} blocks from {folder}")
 
     def handle_folder_changed(path: str) -> None:
+        nonlocal current_folder_path
+        current_folder_path = path
         load_blocks_from_folder(path)
+
+    def handle_block_delete(block: Block) -> None:
+        path = block_locations.get(block.name)
+        if path is None:
+            return
+        confirm = messagebox.askyesno(
+            "刪除方塊",
+            f"確認刪除方塊「{block.display_text}」？這個動作無法復原。",
+            parent=root,
+        )
+        if not confirm:
+            return
+        delete_block(path)
+        load_blocks_from_folder(current_folder_path)
+
+    def handle_block_rename(block: Block) -> None:
+        path = block_locations.get(block.name)
+        if path is None:
+            return
+        new_name = simpledialog.askstring(
+            "重新命名方塊",
+            "請輸入新的方塊資料夾名稱：",
+            initialvalue=block.name,
+            parent=root,
+        )
+        if not new_name or new_name.strip() == block.name:
+            return
+        try:
+            rename_block_folder(path, new_name.strip())
+        except FileExistsError:
+            messagebox.showerror("重新命名失敗", "已存在相同名稱的方塊。", parent=root)
+            return
+        except Exception as exc:
+            messagebox.showerror("重新命名失敗", str(exc), parent=root)
+            return
+        load_blocks_from_folder(current_folder_path)
 
     blocks_panel = BlocksPanel(
         main_frame,
         on_folder_changed=handle_folder_changed,
         on_block_clicked=handle_block_clicked,
+        on_block_delete=handle_block_delete,
+        on_block_rename=handle_block_rename,
     )
     blocks_panel.grid(row=0, column=0, sticky="nsew", padx=6, pady=6)
     blocks_panel.set_folder_path(str(default_folder))

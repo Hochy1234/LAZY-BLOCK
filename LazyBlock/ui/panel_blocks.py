@@ -16,11 +16,15 @@ class BlocksPanel(ttk.Frame):
         *,
         on_folder_changed: Callable[[str], None],
         on_block_clicked: Callable[[Block], None],
+        on_block_delete: Callable[[Block], None] | None = None,
+        on_block_rename: Callable[[Block], None] | None = None,
         **kwargs,
     ) -> None:
         super().__init__(master, **kwargs)
         self._on_folder_changed = on_folder_changed
         self._on_block_clicked = on_block_clicked
+        self._on_block_delete = on_block_delete
+        self._on_block_rename = on_block_rename
         self._blocks: list[Block] = []
         self._block_buttons: list[ttk.Button] = []
         self._folder_var = tk.StringVar()
@@ -82,4 +86,23 @@ class BlocksPanel(ttk.Frame):
                 command=lambda b=block: self._on_block_clicked(b),
             )
             button.pack(fill="x", padx=4, pady=2)
+            button.bind("<Button-3>", lambda event, b=block: self._show_context_menu(event, b))
+            button.bind("<Button-2>", lambda event, b=block: self._show_context_menu(event, b))
             self._block_buttons.append(button)
+
+    def _show_context_menu(self, event: tk.Event, block: Block) -> None:
+        if self._on_block_delete is None and self._on_block_rename is None:
+            return
+
+        menu = tk.Menu(self, tearoff=False)
+        if self._on_block_rename is not None:
+            menu.add_command(label="重新命名", command=lambda b=block: self._on_block_rename(b))
+        if self._on_block_delete is not None:
+            if menu.index("end") is not None:
+                menu.add_separator()
+            menu.add_command(label="刪除", command=lambda b=block: self._on_block_delete(b))
+
+        try:
+            menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            menu.grab_release()
